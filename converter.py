@@ -425,7 +425,11 @@ def convert_file(filepath):
 def main():
     sql_files = get_sql_files()
     for f in sql_files:
-        convert_file(f)
+        try:
+            convert_file(f)
+        except Exception as ex:
+            print("Unable to read data from %s -- %s" % (f, ex))
+            break
 
 
 if __name__ == '__main__':
