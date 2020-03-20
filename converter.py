@@ -34,7 +34,7 @@ def get_fields(keywords, table):
 
             # avoid Python keyword clashes
             if field.lower() == "type":
-                field = "%s_type" % table
+                field = "type_%s" % table
             elif field.lower() == "id":
                 field = "%s_id" % table
             elif field.lower() == "property":
@@ -174,7 +174,7 @@ def check_datatype(lines, datatype, prop, tabs, limits=None):
     # Exact match of the limits or <=
     exact = False
 
-    if datatype == "varchar":
+    if datatype == "varchar" or datatype == "longtext":
         datatype = "str"
 
     elif datatype == "char":
