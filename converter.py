@@ -414,9 +414,9 @@ def convert_file(filepath):
         except Exception:
             pass
 
-    os.mkdir(root_dir)
-    os.mkdir(models_dir)
-    os.mkdir(repositories_dir)
+    os.makedirs(root_dir)
+    os.makedirs(models_dir)
+    os.makedirs(repositories_dir)
 
     generate_classes(models_dir, tables)
     generate_repositories(repositories_dir, database_name, tables)
