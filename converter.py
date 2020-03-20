@@ -1,4 +1,11 @@
 def get_sql_files():
+    """
+    This function will list all .sql files in the sql folder.
+    A possible extension to the script could be browsing for .sql files.
+    However, this way works fine for the purposes that I intend to use it for
+
+    :return: list of all .sql files within the sql directory, located in the root of this project
+    """
     # maybe add a browser dialog here
     search_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql")
 
@@ -10,6 +17,14 @@ def get_sql_files():
 
 
 def get_table_name(keywords):
+    """
+    This function will extract the name of the current table and alter it
+    This altering includes capitalising the first letter and extracting a possible 'tbl' prefix
+
+    :param keywords: a list of words between backticks in this table's part of the .sql file
+    :return: altered name of the table, as well as the original name
+    This original name is used in the repository classes to generate the MySQL queries.
+    """
     table = keywords[0]
     original_table = table
     if table.startswith("tbl"):
@@ -21,6 +36,14 @@ def get_table_name(keywords):
 
 
 def get_fields(keywords, table):
+    """
+    This function will store all of the columns of this database in a dictionary
+
+    :param keywords: a list of words between backticks in this table's part of the .sql file
+    :param table: the name of the current table, used to deform clashing names like 'id' and 'type'
+    :return: a dictionary that contains all columns that belong to the current table
+    as well as the data that is needed to reconstruct said column as a Python class
+    """
     result = {}
 
     for keyword in keywords:
@@ -30,6 +53,8 @@ def get_fields(keywords, table):
             field = re.findall(r'\`(.*?)\`', keyword)[0]
             # Store initial field name before altering it for the lookup in the repository class
             field_backup = field
+
+            # Extract data that belongs to the column
             fields_split = keyword.split(field)[1]
             datatype = re.findall(r'\w+', fields_split[2:])[0]
             limits = re.findall(r'\((.*?)\)', fields_split)
@@ -43,6 +68,7 @@ def get_fields(keywords, table):
             elif field.lower() == "property":
                 field = "%s_property" % table
 
+            # Store in dictionary
             result[field.lower()] = {
                 "datatype": datatype,
                 "not_null": not_null,
@@ -56,6 +82,19 @@ def get_fields(keywords, table):
 
 
 def get_database_tables(data):
+    """
+    This function will store all tables from the given .sql file in a dictionary.
+    The keys will be the columns which in turn are also dictionaries containing.
+        - Datatype
+        - Limits
+        - Whether or note the column accepts nulls
+
+    It also includes the original name of the table.
+    This variable is used to construct the MySQL queries in the repository classes.
+
+    :param data: content of the current .sql file as 1 string
+    :return: dictionary described above
+    """
     result = dict()
 
     # Split per table and remove the first
@@ -78,10 +117,18 @@ def get_database_tables(data):
 
 
 def get_database_name(data):
+    """
+    This function will extract the name of the currently checked database
+    using a regular expression
+
+    :param data: content of the current .sql file as 1 string
+    :return: name of the database
+    """
     try:
         database_name = re.findall(r'CREATE +DATABASE +IF +NOT +EXISTS +`\w+`', data)[0]
         database_name = re.findall(r'`\w+`', database_name)[0][1:-1]
     except Exception:
+        # No match
         database_name = "unknown database"
 
     return database_name
@@ -179,6 +226,22 @@ def check_limits(lines, limits, tabs, prop, datatype, exact=False):
 
 
 def translate_datatype(tabs, lines, limits, datatype):
+    """
+    This function will translate the datatype from MySQL terms to Python terms.
+    It will also set limits when this is necessary
+        - smallints vs mediumints
+        - regular expressions for datetime, date, time, timestamp, year
+
+    :param tabs: Amount of tabs used to outline the added lines
+    :param lines: List of lines to append to (only comments)
+    :param limits: Limits of the current column
+    :param datatype: Datatype of the current column, in MySQL terms
+    :return:
+        - exact: whether the input value has to match the limits exactly, or just have to be <=
+        - lines: updates list of lines, including the added comments
+        - limits: limitations of the input value
+        - datatype: datatype of the current column, in Python terms
+    """
     exact = False
 
     if datatype == "varchar" or datatype == "longtext":
@@ -238,7 +301,18 @@ def translate_datatype(tabs, lines, limits, datatype):
     return exact, lines, limits, datatype
 
 
-def check_datatype(lines, datatype, prop, tabs, limits=None):
+def validate_datatype(lines, datatype, prop, tabs, limits=None):
+    """
+    This function will generate the code that is used to validate the input value
+    Firstly, the datatype is converted to Python terms, and the limits are updated accordingly
+
+    :param lines:
+    :param datatype:
+    :param prop:
+    :param tabs:
+    :param limits:
+    :return:
+    """
     # Exact match of the limits or <=
     exact, lines, limits, datatype = translate_datatype(tabs, lines, limits, datatype)
 
@@ -254,12 +328,27 @@ def check_datatype(lines, datatype, prop, tabs, limits=None):
 
 
 def generate_repositories(repos, database_name, tables):
+    """
+    This function will generate basic repository classes for each table.
+    This repository class will yield all MySQL queries, as well as some utility functions,
+    which are also generated for each table.
+        - map to object of the correct class, with the correct parameters
+        - check column
+
+    :param repos: folder to store the repository classes
+    :param database_name: name of the current database
+    :param tables: dictionary of all tables that are in the current database
+    """
     for table in tables.keys():
+        # Initialize file
         lines = [
+            # import the generated class that matches this table,
+            # as well as the database connector class
             "from models.%s import %s" % (table, table),
             "from repositories.Database import Database",
             "",
             "",
+            # Simple MySQL query to get all contents of the current table
             "class %sRepository:" % table,
             "\t@ staticmethod",
             "\tdef read_all():",
@@ -274,6 +363,8 @@ def generate_repositories(repos, database_name, tables):
             "",
             "\t\treturn result",
             "",
+            # Simple MySQL to get all contents of the current table, matching a certain condition on the primary key
+            # Note the disabling of SQL injection
             "\t@staticmethod",
             "\tdef read_single(_id):",
             "\t\tif not _id:",
@@ -295,6 +386,7 @@ def generate_repositories(repos, database_name, tables):
             "",
             "\t\treturn result",
             "",
+            # method to verify return value of the database
             "\t@staticmethod",
             "\tdef check_column(row, column_name):",
             "\t\tresult = None",
@@ -303,25 +395,30 @@ def generate_repositories(repos, database_name, tables):
             "",
             "\t\treturn result",
             "",
+            # Utility class to convert database result to an object of the generated class that matches this table
             "\t@staticmethod",
             "\tdef map_to_object(row):",
             "\t\tif row is not None and type(row) is dict:"
+            # the next bit is dynamically generated in a loop
         ]
 
+        # Lists for both the actual column names, and the altered ones
         real_properties = [tables[table][p]["real_name"] for p in tables[table].keys() if p != "original_table_name"]
         rewritten_properties = [p for p in tables[table].keys() if p != "original_table_name"]
 
         for prop, rewritten_prop in zip(real_properties, rewritten_properties):
+            # Translate MySQL datatype to Python
             _, _, _, datatype = translate_datatype(
                 0, [], [], tables[table][rewritten_prop]["datatype"]
             )
 
+            # Validate and assign the value comming from the database
             lines.append("\t\t\t%s = %sRepository.check_column(row, \"%s\")" % (
                 rewritten_prop, table, prop
             ))
 
             if datatype != "str":
-                # Convert if possible
+                # Cast to the correct datatype if possible
                 lines.append("\t\t\t%s = %s(%s) if %s is not None else None" % (
                     rewritten_prop, datatype, rewritten_prop, rewritten_prop
                 ))
@@ -332,13 +429,22 @@ def generate_repositories(repos, database_name, tables):
             table, ", ".join(rewritten_properties)
         ))
 
+        # Write repository class to disk
         with open(os.path.join(repos, "%sRepository" % table) + ".py", "w") as f:
             f.writelines(["%s\n" % line for line in lines])
 
 
 def generate_classes(models, tables):
-    print(tables)
+    """
+    This function will generate a class for each table in the current database.
+    Each column is represented by a property that uses a setter function to validate all input.
+
+    :param models: directory to store these classes
+    :param tables: dictionary of all tables in the current database,
+    as well as their columns and data on those columns
+    """
     for table in tables.keys():
+        # Initialize the file
         lines = [
             "import re",
             "",
@@ -346,63 +452,97 @@ def generate_classes(models, tables):
             "class %s:" % table
         ]
 
+        # Store properties in a list and format them a bit
         properties = [
             prop.lower() for prop in tables[table].keys()
             if prop != "original_table_name"
         ]
 
+        # __init__
         lines.append("\tdef __init__(self, %s):" % ", ".join(properties))
         lines.append("\t\tself._valueErrors = dict()")
         for prop in properties:
             lines.append("\t\tself.%s = %s" % (prop, prop))
 
+        # valueErrors property
         lines.append("\n\t@property")
         lines.append("\tdef valueErrors(self):")
         lines.append("\t\treturn self._valueErrors")
 
+        # isValid property
         lines.append("\n\t@property")
         lines.append("\tdef isValid(self):")
         lines.append("\t\treturn len(self._valueErrors) == 0")
 
+        # Custom getter and setter functions per column of the current table
         for prop in properties:
+            # Pull variables out of the dictionary
             limits = tables[table][prop]["limits"]
             not_null = tables[table][prop]["not_null"]
             datatype = tables[table][prop]["datatype"].lower()
 
+            # Getter
             lines.append("\n\t@property")
             lines.append("\tdef %s(self):" % prop)
             lines.append("\t\treturn self._%s" % prop)
+
+            # Setter
             lines.append("\t@%s.setter" % prop)
             lines.append("\tdef %s(self, value):" % prop)
             if not_null:
                 # This property CAN NOT be None
                 lines.append("\t\t# Property CAN NOT be None")
-                lines = check_datatype(lines, datatype, prop, tabs=2, limits=limits)
+                lines = validate_datatype(lines, datatype, prop, tabs=2, limits=limits)
             else:
                 # This property CAN be None
                 lines.append("\t\t# Property CAN be None")
                 lines.append("\t\tif value is None:")
                 lines.append("\t\t\tself._%s = value" % prop)
                 lines.append("\t\telse:")
-                lines = check_datatype(lines, datatype, prop, tabs=3, limits=limits)
+                lines = validate_datatype(lines, datatype, prop, tabs=3, limits=limits)
 
+        # toString method
         lines.append("\n\tdef __str__(self):")
         lines.append("\t\treturn \"%s: %s: %%s\" %% self.%s" % (table, properties[0], properties[0]))
 
+        # When printed in a list, copy format of toString method
         lines.append("\n\tdef __repr__(self):")
         lines.append("\t\tself.__str__()")
 
+        # Writing the file to disk
         with open(os.path.join(models, table) + ".py", "w") as f:
             f.writelines(["%s\n" % line for line in lines])
 
 
 def convert_file(filepath):
+    """
+    This is the main directory of the project.
+    Here, the content of the current .sql file is read and stored.
+
+    This data will be used to extract
+        - The name of the database
+        - The tables of the database
+        - The columns of these tables
+        - The data of these columns (datatype, limits, allowing nulls)
+
+    When all of the data is gathered, it will be used to generate classes.
+    These classes are exact replicas of the table they represent.
+    They will only allow data to go in that is absolutely valid, but manual checks are always recommended.
+
+    Lastly, it will generate basic repository classes, including some basic SQL queries
+
+    :param filepath: filepath of the current .sql file
+    """
+
+    # Read data
     with open(filepath, "r", encoding="utf-8") as f:
         data = f.read().replace('\n', ' ').replace('\r', '')
 
+    # Make the data more meaningful
     database_name = get_database_name(data)
     tables = get_database_tables(data)
 
+    # Define directories to store generated files
     root_dir = os.path.join(os.path.dirname(filepath), "%s_python" % database_name)
     models_dir = os.path.join(root_dir, "models")
     repositories_dir = os.path.join(root_dir, "repositories")
@@ -414,19 +554,26 @@ def convert_file(filepath):
         except Exception:
             pass
 
+    # Create directories to store generated files
     os.makedirs(root_dir)
     os.makedirs(models_dir)
     os.makedirs(repositories_dir)
 
+    # Generate files
     generate_classes(models_dir, tables)
     generate_repositories(repositories_dir, database_name, tables)
 
 
 def main():
+    """
+    This function will list all .sql files in the sql folder.
+    It will then call to convert all columns of all tables into Python classes.
+    """
     sql_files = get_sql_files()
     for f in sql_files:
         try:
             convert_file(f)
+            print("Succesfully converted %s" % os.path.splitext(os.path.basename(f))[0])
         except Exception as ex:
             print("Unable to read data from %s -- %s" % (f, ex))
             break
