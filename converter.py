@@ -11,10 +11,10 @@ def get_sql_files():
 
 def get_table_name(keywords):
     table = keywords[0]
-    if table.startswith("tbl"):
-        table = table.split("tbl")[1]
-    # Capitalize table name
-    table = table[0].upper() + table[1:]
+    # if table.startswith("tbl"):
+    #     table = table.split("tbl")[1]
+    # # Capitalize table name
+    # table = table[0].upper() + table[1:]
 
     return table
 
@@ -25,7 +25,7 @@ def get_fields(keywords, table):
     for keyword in keywords:
         try:
             keyword = keyword.strip()
-            # print(keyword)
+
             field = re.findall(r'\`(.*?)\`', keyword)[0]
             fields_split = keyword.split(field)[1]
             datatype = re.findall(r'\w+', fields_split[2:])[0]
@@ -79,23 +79,175 @@ def get_database_name(data):
     return database_name
 
 
-def check_decimal_limits(limits):
+def check_int_limits(limits, tabs):
+    limits = limits[0].split(",")
+
+    if len(limits) == 2:
+        min_value = int(limits[0])
+        max_value = int(limits[1])
+
+        return "\t" * tabs + "if %d < value < %d:" % (min_value, max_value)
+    elif len(limits) == 1:
+        return "\t" * tabs + "if len(str(value)) == %d:" % limits[0]
+    else:
+        return "# ## FAILED TO VERIFY INT LIMITS: %s" % limits
+
+
+def check_decimal_limits(limits, tabs):
     limits_split = limits[0].split(",")
+    if len(limits_split) == 0:
+        limits_split.append("0")
     max_after_comma = int(limits_split[1])
     max_before_comma = int(limits_split[0]) - max_after_comma
 
-    result = "\t\t\tif \".\" in str(value):"
-    result += "\n\t\t\t\tif ((len(str(value).split(\".\")[0]) <= %d) and (len(str(value).split(\".\")[1]) <= %d)):" % (
-            max_before_comma, max_after_comma
-        )
+    result = "\t" * tabs + "if \".\" in str(value):"
+    result += "\n" + "\t" * (tabs + 1) + \
+              "if ((len(str(value).split(\".\")[0]) <= %d) and (len(str(value).split(\".\")[1]) <= %d)):" % (
+                  max_before_comma, max_after_comma
+              )
 
     return result
+
+
+def check_limits(lines, limits, tabs, prop, datatype, exact=False):
+    if limits:
+        if datatype == "str":
+            limit = limits[0]
+            try:
+                limit = int(limit)
+                if exact:
+                    lines.append("\t" * tabs + "if len(str(value)) == %d:" % limit)
+                else:
+                    lines.append("\t" * tabs + "if len(str(value)) <= %d:" % limit)
+                lines.append("\t" * (tabs + 1) + "self._%s = str(value)" % prop)
+                lines.append("\t" * tabs + "else:")
+                if exact:
+                    lines.append("\t" * (tabs + 1) +
+                                 "self._valueErrors[\"%s\"] = "
+                                 "ValueError(\"input voor %s is niet de juitse lengte (%s)\")"
+                                 % (prop, prop, limit))
+                else:
+                    lines.append(
+                        "\t" * (tabs + 1) + "self._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
+                            prop, prop
+                        ))
+            except Exception:
+                # Limit cant be turned into an int, so it's a regular expression
+                lines.append("\t" * tabs + "if len(re.findall(r'%s', value)[0]) == len(value):" % limit)
+                lines.append("\t" * (tabs + 1) + "self._%s = str(value)" % prop)
+                lines.append("\t" * tabs + "else:")
+                lines.append("\t" * (tabs + 1) +
+                             "self._valueErrors[\"%s\"] = "
+                             "ValueError(\"input voor %s match het patroon niet (%s)\")"
+                             % (prop, prop, limit))
+        else:
+            if datatype == "int":
+                lines.append(check_int_limits(limits, tabs))
+                # One less indent bcus with floats we need to verify the "."
+                tabs -= 1
+            elif datatype == "float":
+                lines.append(check_decimal_limits(limits, tabs))
+
+            lines.append("\t" * (tabs + 2) + "self._%s = value" % prop)
+            lines.append("\t" * (tabs + 1) + "else:")
+            lines.append("\t" * (tabs + 2) +
+                         "self._valueErrors[\"%s\"] = ValueError(\"input voor %s is te groot / klein\")" % (
+                             prop, prop
+                         ))
+
+            if datatype == "float":
+                lines.append("\t" * tabs + "else:")
+                lines.append("\t" * (tabs + 1) + "if len(str(value)) <= %s:" % limits[0].split(",")[0])
+                lines.append("\t" * (tabs + 2) + "self._%s = value" % prop)
+                lines.append("\t" * (tabs + 1) + "else:")
+                lines.append(
+                    "\t" * (tabs + 2) + "self._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
+                        prop, prop
+                    ))
+    else:
+        lines.append("\t" * tabs + "self._%s = str(value)" % prop)
+
+    return lines
+
+
+def check_datatype(lines, datatype, prop, tabs, limits=None):
+    # Exact match of the limits or <=
+    exact = False
+
+    if datatype == "varchar":
+        datatype = "str"
+
+    elif datatype == "char":
+        exact = True
+        datatype = "str"
+
+    elif datatype == "decimal" or datatype == "double":
+        datatype = "float"
+
+    elif datatype == "tinyint":
+        lines.append("\t" * tabs + "# tinyint")
+        datatype = "int"
+        limits = ['-128,127']
+
+    elif datatype == "smallint":
+        lines.append("\t" * tabs + "# smallint")
+        datatype = "int"
+        limits = ['-32768,32767']
+
+    elif datatype == "mediumint":
+        lines.append("\t" * tabs + "# mediumint")
+        datatype = "int"
+        limits = ['-8388608,8388607']
+
+    elif datatype == "int" or datatype == "integer":
+        lines.append("\t" * tabs + "# regular int")
+        datatype = "int"
+        limits = ['-2147483648,2147483647']
+
+    elif datatype == "datetime" or datatype == "timestamp":
+        lines.append("\t" * tabs + "#'0000-00-00 00:00:00'")
+        datatype = "str"
+        limits = [r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"]
+        exact = True
+
+    elif datatype == "time":
+        lines.append("\t" * tabs + "#'00:00:00'")
+        datatype = "str"
+        limits = [r"\d{2}:\d{2}:\d{2}"]
+        exact = True
+
+    elif datatype == "date":
+        lines.append("\t" * tabs + "#'0000-00-00'")
+        datatype = "str"
+        limits = [r"\d{4}-\d{2}-\d{2}"]
+        exact = True
+
+    elif datatype == "year":
+        lines.append("\t" * tabs + "#'0000'")
+        datatype = "str"
+        limits = [r"\d{4}"]
+        exact = True
+
+    lines.append("\t" * tabs + "if type(value) is %s:" % datatype)
+    lines = check_limits(lines, limits, tabs + 1, prop, datatype, exact)
+
+    lines.append("\t" * tabs + "else:")
+    lines.append("\t" * (tabs + 1) + "self._valueErrors[\"%s\"] = ValueError(\"input voor %s is ongeldig\")" % (
+        prop, prop
+    ))
+
+    return lines
 
 
 def generate_classes(models, tables):
     print(tables)
     for table in tables.keys():
-        lines = ["class %s:" % table]
+        lines = [
+            "import re",
+            "",
+            "",
+            "class %s:" % table
+        ]
 
         properties = [prop.lower() for prop in tables[table].keys()]
 
@@ -115,7 +267,7 @@ def generate_classes(models, tables):
         for prop in properties:
             limits = tables[table][prop]["limits"]
             not_null = tables[table][prop]["not_null"]
-            datatype = tables[table][prop]["datatype"]
+            datatype = tables[table][prop]["datatype"].lower()
 
             lines.append("\n\t@property")
             lines.append("\tdef %s(self):" % prop)
@@ -124,81 +276,15 @@ def generate_classes(models, tables):
             lines.append("\tdef %s(self, value):" % prop)
             if not_null:
                 # This property CAN NOT be None
-                if datatype == "int":
-                    lines.append("\t\tif type(value) is int:")
-                    lines.append("\t\t\tself._%s = value" % prop)
-                    lines.append("\t\telse:")
-                    lines.append("\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is ongeldig\")" % (
-                        prop, prop
-                    ))
-                elif datatype == "decimal":
-                    lines.append("\t\tif type(value) is float:")
-                    if limits:
-                        lines.append(check_decimal_limits(limits))
-                        lines.append("\t\t\t\t\tself._%s = value" % prop)
-                        lines.append("\t\t\t\telse:")
-                        lines.append("\t\t\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
-                            prop, prop
-                        ))
-                        lines.append("\t\t\telse:")
-                        lines.append("\t\t\t\tif len(str(value)) <= %s:" % limits[0].split(",")[0])
-                        lines.append("\t\t\t\t\tself._%s = value" % prop)
-                        lines.append("\t\t\t\telse:")
-                        lines.append("\t\t\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
-                            prop, prop
-                        ))
-                    else:
-                        lines.append("\t\tself._%s = value" % prop)
-                elif datatype == "varchar":
-                    lines.append("\t\tif type(value) is str:")
-                    if limits:
-                        lines.append("\t\t\tif len(value) <= %s:" % limits[0])
-                        lines.append("\t\t\t\tself._%s = value" % prop)
-                        lines.append("\t\t\telse:")
-                        lines.append("\t\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
-                            prop, prop
-                        ))
-                    else:
-                        lines.append("\t\t\tself._%s = value" % prop)
-                    lines.append("\t\telse:")
-                    lines.append("\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is ongeldig\")" % (
-                        prop, prop
-                    ))
-                elif datatype == "tinyint":
-                    print("https://dev.mysql.com/doc/refman/8.0/en/integer-types.html")
-                else:
-                    print(datatype, "not yet supported")
+                lines.append("\t\t# Property CAN NOT be None")
+                lines = check_datatype(lines, datatype, prop, tabs=2, limits=limits)
             else:
                 # This property CAN be None
+                lines.append("\t\t# Property CAN be None")
                 lines.append("\t\tif value is None:")
                 lines.append("\t\t\tself._%s = value" % prop)
                 lines.append("\t\telse:")
-                # TODO opsplitsen in functies en dan eventueel "\t"+return value doen hier
-                if limits:
-                    try:
-                        limit = int(limits[0])
-                        lines.append("\t\t\tif len(str(value)) <= %d:" % limit)
-                        lines.append("\t\t\t\tself._%s = str(value)" % prop)
-                        lines.append("\t\t\telse:")
-                        lines.append("\t\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
-                            prop, prop
-                        ))
-                    except Exception:
-                        lines.append(check_decimal_limits(limits))
-                        lines.append("\t\t\t\t\tself._%s = value" % prop)
-                        lines.append("\t\t\t\telse:")
-                        lines.append("\t\t\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
-                            prop, prop
-                        ))
-                        lines.append("\t\t\telse:")
-                        lines.append("\t\t\t\tif len(str(value)) <= %s:" % limits[0].split(",")[0])
-                        lines.append("\t\t\t\t\tself._%s = value" % prop)
-                        lines.append("\t\t\t\telse:")
-                        lines.append("\t\t\t\t\tself._valueErrors[\"%s\"] = ValueError(\"input voor %s is te lang\")" % (
-                            prop, prop
-                        ))
-                else:
-                    lines.append("\t\t\tself._%s = str(value)" % prop)
+                lines = check_datatype(lines, datatype, prop, tabs=3, limits=limits)
 
         lines.append("\n\tdef __str__(self):")
         lines.append("\t\treturn \"%s: %s: %%s\" %% self.%s" % (table, properties[0], properties[0]))
@@ -206,7 +292,7 @@ def generate_classes(models, tables):
         lines.append("\n\tdef __repr__(self):")
         lines.append("\t\tself.__str__()")
 
-        with open(os.path.join(models, table)+".py", "w") as f:
+        with open(os.path.join(models, table) + ".py", "w") as f:
             f.writelines(["%s\n" % line for line in lines])
 
 
