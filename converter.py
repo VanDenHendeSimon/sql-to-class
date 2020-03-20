@@ -11,10 +11,10 @@ def get_sql_files():
 
 def get_table_name(keywords):
     table = keywords[0]
-    # if table.startswith("tbl"):
-    #     table = table.split("tbl")[1]
-    # # Capitalize table name
-    # table = table[0].upper() + table[1:]
+    if table.startswith("tbl"):
+        table = table.split("tbl")[1]
+    # Capitalize table name
+    table = table[0].upper() + table[1:]
 
     return table
 
