@@ -11,12 +11,13 @@ def get_sql_files():
 
 def get_table_name(keywords):
     table = keywords[0]
+    original_table = table
     if table.startswith("tbl"):
         table = table.split("tbl")[1]
     # Capitalize table name
     table = table[0].upper() + table[1:]
 
-    return table
+    return table, original_table
 
 
 def get_fields(keywords, table):
@@ -27,6 +28,8 @@ def get_fields(keywords, table):
             keyword = keyword.strip()
 
             field = re.findall(r'\`(.*?)\`', keyword)[0]
+            # Store initial field name before altering it for the lookup in the repository class
+            field_backup = field
             fields_split = keyword.split(field)[1]
             datatype = re.findall(r'\w+', fields_split[2:])[0]
             limits = re.findall(r'\((.*?)\)', fields_split)
@@ -43,7 +46,8 @@ def get_fields(keywords, table):
             result[field.lower()] = {
                 "datatype": datatype,
                 "not_null": not_null,
-                "limits": limits
+                "limits": limits,
+                "real_name": field_backup,
             }
         except Exception:
             pass
@@ -61,8 +65,12 @@ def get_database_tables(data):
         d = d.split("ENGINE")[0].split("KEY")[0]
 
         # Extract words between ``
-        table = get_table_name(re.findall(r'\`(.*?)\`', d))
+        table, original_table = get_table_name(re.findall(r'\`(.*?)\`', d))
         fields = get_fields("(".join(d.split("(")[1:]).split(", "), table)
+
+        fields.update({
+            "original_table_name": original_table
+        })
 
         result[table] = fields
 
@@ -170,8 +178,7 @@ def check_limits(lines, limits, tabs, prop, datatype, exact=False):
     return lines
 
 
-def check_datatype(lines, datatype, prop, tabs, limits=None):
-    # Exact match of the limits or <=
+def translate_datatype(tabs, lines, limits, datatype):
     exact = False
 
     if datatype == "varchar" or datatype == "longtext":
@@ -228,6 +235,13 @@ def check_datatype(lines, datatype, prop, tabs, limits=None):
         limits = [r"\d{4}"]
         exact = True
 
+    return exact, lines, limits, datatype
+
+
+def check_datatype(lines, datatype, prop, tabs, limits=None):
+    # Exact match of the limits or <=
+    exact, lines, limits, datatype = translate_datatype(tabs, lines, limits, datatype)
+
     lines.append("\t" * tabs + "if type(value) is %s:" % datatype)
     lines = check_limits(lines, limits, tabs + 1, prop, datatype, exact)
 
@@ -237,6 +251,89 @@ def check_datatype(lines, datatype, prop, tabs, limits=None):
     ))
 
     return lines
+
+
+def generate_repositories(repos, database_name, tables):
+    for table in tables.keys():
+        lines = [
+            "from models.%s import %s" % (table, table),
+            "from repositories.Database import Database",
+            "",
+            "",
+            "class %sRepository:" % table,
+            "\t@ staticmethod",
+            "\tdef read_all():",
+            "\t\tresult = []",
+            "\t\tsql = \"SELECT * FROM %s.%s\"" % (database_name, tables[table]["original_table_name"]),
+            "\t\trows = Database.get_rows(sql)",
+            "",
+            "\t\tif rows is not None:",
+            "\t\t\tfor row in rows:",
+            "\t\t\t\t# mapping naar object",
+            "\t\t\t\tresult.append(%sRepository.map_to_object(row))" % table,
+            "",
+            "\t\treturn result",
+            "",
+            "\t@staticmethod",
+            "\tdef read_single(_id):",
+            "\t\tif not _id:",
+            "\t\t\treturn \"Ongedlig ID. Probeer opnieuw\"",
+            "",
+            "\t\tsql = \"\"\"",
+            "\t\tSELECT",
+            "\t\t\t*",
+            "\t\tFROM %s.%s" % (database_name, tables[table]["original_table_name"]),
+            "\t\tWHERE %s = %%s" % list(tables[table].keys())[0],
+            "\t\t\"\"\"",
+            "\t\tparams = [_id]",
+            "",
+            "\t\tresult = Database.get_one_row(sql, params)",
+            "",
+            "\t\tif type(result) is dict:",
+            "\t\t\t# Mapping naar %s object" % table,
+            "\t\t\t result = %sRepository.map_to_object(result)" % table,
+            "",
+            "\t\treturn result",
+            "",
+            "\t@staticmethod",
+            "\tdef check_column(row, column_name):",
+            "\t\tresult = None",
+            "\t\tif column_name in row.keys() and row[column_name] is not None:",
+            "\t\t\tresult = row[column_name]",
+            "",
+            "\t\treturn result",
+            "",
+            "\t@staticmethod",
+            "\tdef map_to_object(row):",
+            "\t\tif row is not None and type(row) is dict:"
+        ]
+
+        real_properties = [tables[table][p]["real_name"] for p in tables[table].keys() if p != "original_table_name"]
+        rewritten_properties = [p for p in tables[table].keys() if p != "original_table_name"]
+
+        for prop, rewritten_prop in zip(real_properties, rewritten_properties):
+            _, _, _, datatype = translate_datatype(
+                0, [], [], tables[table][rewritten_prop]["datatype"]
+            )
+
+            lines.append("\t\t\t%s = %sRepository.check_column(row, \"%s\")" % (
+                rewritten_prop, table, prop
+            ))
+
+            if datatype != "str":
+                # Convert if possible
+                lines.append("\t\t\t%s = %s(%s) if %s is not None else None" % (
+                    rewritten_prop, datatype, rewritten_prop, rewritten_prop
+                ))
+                lines.append("")
+
+        lines.append("")
+        lines.append("\t\treturn %s(%s)" % (
+            table, ", ".join(rewritten_properties)
+        ))
+
+        with open(os.path.join(repos, "%sRepository" % table) + ".py", "w") as f:
+            f.writelines(["%s\n" % line for line in lines])
 
 
 def generate_classes(models, tables):
@@ -249,7 +346,10 @@ def generate_classes(models, tables):
             "class %s:" % table
         ]
 
-        properties = [prop.lower() for prop in tables[table].keys()]
+        properties = [
+            prop.lower() for prop in tables[table].keys()
+            if prop != "original_table_name"
+        ]
 
         lines.append("\tdef __init__(self, %s):" % ", ".join(properties))
         lines.append("\t\tself._valueErrors = dict()")
@@ -314,8 +414,12 @@ def convert_file(filepath):
         except Exception:
             pass
 
+    os.mkdir(root_dir)
     os.mkdir(models_dir)
+    os.mkdir(repositories_dir)
+
     generate_classes(models_dir, tables)
+    generate_repositories(repositories_dir, database_name, tables)
 
 
 def main():
