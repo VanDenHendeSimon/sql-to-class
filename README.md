@@ -1,5 +1,5 @@
 # sql-to-class
-Converter to turn sql tables into Python classes  
+Converter to turn sql tables into Python classes that mirror the table exactly, as well as generating repository classes.  
 
 This script runs over all .sql files in the designated folder, and translated them to Python classes.  
 It will also generate a repository script for each field in the database.  
