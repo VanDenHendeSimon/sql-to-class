@@ -1,7 +1,7 @@
 import re
 
 
-class tblbtwtarief:
+class Btwtarief:
 	def __init__(self, btwcode, btwpercentage):
 		self._valueErrors = dict()
 		self.btwcode = btwcode
@@ -54,7 +54,7 @@ class tblbtwtarief:
 				self._valueErrors["btwpercentage"] = ValueError("input voor btwpercentage is ongeldig")
 
 	def __str__(self):
-		return "tblbtwtarief: btwcode: %s" % self.btwcode
+		return "Btwtarief: btwcode: %s" % self.btwcode
 
 	def __repr__(self):
 		self.__str__()

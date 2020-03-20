@@ -1,7 +1,7 @@
 import re
 
 
-class tblwerknemers:
+class Werknemers:
 	def __init__(self, werknemerid, familienaam, voornaam, adres, gemeente, postcode, telefoonnummer, functie, brutowedde, superieur, toestelnummer, auto, indienst, geboortedatum, geslacht, foto, bijzonderheden):
 		self._valueErrors = dict()
 		self.werknemerid = werknemerid
@@ -304,13 +304,13 @@ class tblwerknemers:
 		if value is None:
 			self._bijzonderheden = value
 		else:
-			if type(value) is longtext:
+			if type(value) is str:
 				self._bijzonderheden = str(value)
 			else:
 				self._valueErrors["bijzonderheden"] = ValueError("input voor bijzonderheden is ongeldig")
 
 	def __str__(self):
-		return "tblwerknemers: werknemerid: %s" % self.werknemerid
+		return "Werknemers: werknemerid: %s" % self.werknemerid
 
 	def __repr__(self):
 		self.__str__()

@@ -1,7 +1,7 @@
 import re
 
 
-class tblverzenders:
+class Verzenders:
 	def __init__(self, verzendid, bedrijf, telefoonnummer):
 		self._valueErrors = dict()
 		self.verzendid = verzendid
@@ -66,7 +66,7 @@ class tblverzenders:
 				self._valueErrors["telefoonnummer"] = ValueError("input voor telefoonnummer is ongeldig")
 
 	def __str__(self):
-		return "tblverzenders: verzendid: %s" % self.verzendid
+		return "Verzenders: verzendid: %s" % self.verzendid
 
 	def __repr__(self):
 		self.__str__()

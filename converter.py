@@ -303,11 +303,14 @@ def convert_file(filepath):
     database_name = get_database_name(data)
     tables = get_database_tables(data)
 
-    models_dir = os.path.join(os.path.dirname(filepath), "%s_models" % database_name)
+    root_dir = os.path.join(os.path.dirname(filepath), "%s_python" % database_name)
+    models_dir = os.path.join(root_dir, "models")
+    repositories_dir = os.path.join(root_dir, "repositories")
+
     # Clear previous exports
-    if os.path.exists(models_dir):
+    if os.path.exists(root_dir):
         try:
-            shutil.rmtree(models_dir, True)
+            shutil.rmtree(root_dir, True)
         except Exception:
             pass
 

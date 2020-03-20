@@ -1,7 +1,7 @@
 import re
 
 
-class tblproducten:
+class Producten:
 	def __init__(self, productnummer, leveranciersnummer, categorienummer, productnaam, nederlandsenaam, hoeveelheidpereenheid, prijspereenheid, voorraad, btwcode, inbestelling, bestelpunt, uitassortiment):
 		self._valueErrors = dict()
 		self.productnummer = productnummer
@@ -235,7 +235,7 @@ class tblproducten:
 			self._valueErrors["uitassortiment"] = ValueError("input voor uitassortiment is ongeldig")
 
 	def __str__(self):
-		return "tblproducten: productnummer: %s" % self.productnummer
+		return "Producten: productnummer: %s" % self.productnummer
 
 	def __repr__(self):
 		self.__str__()

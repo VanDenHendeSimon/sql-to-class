@@ -1,7 +1,7 @@
 import re
 
 
-class tblcategorieen:
+class Categorieen:
 	def __init__(self, categorienummer, categorienaam, bijschrijving):
 		self._valueErrors = dict()
 		self.categorienummer = categorienummer
@@ -60,7 +60,7 @@ class tblcategorieen:
 			self._valueErrors["bijschrijving"] = ValueError("input voor bijschrijving is ongeldig")
 
 	def __str__(self):
-		return "tblcategorieen: categorienummer: %s" % self.categorienummer
+		return "Categorieen: categorienummer: %s" % self.categorienummer
 
 	def __repr__(self):
 		self.__str__()

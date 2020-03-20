@@ -1,7 +1,7 @@
 import re
 
 
-class tblorders:
+class Orders:
 	def __init__(self, orderid, klantnummer, werknemerid, verzendid, orderdatum, vervaldatum, leverdatum, vrachtkosten):
 		self._valueErrors = dict()
 		self.orderid = orderid
@@ -156,7 +156,7 @@ class tblorders:
 				self._valueErrors["vrachtkosten"] = ValueError("input voor vrachtkosten is ongeldig")
 
 	def __str__(self):
-		return "tblorders: orderid: %s" % self.orderid
+		return "Orders: orderid: %s" % self.orderid
 
 	def __repr__(self):
 		self.__str__()

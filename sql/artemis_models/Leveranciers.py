@@ -1,7 +1,7 @@
 import re
 
 
-class tblleveranciers:
+class Leveranciers:
 	def __init__(self, leveranciersnummer, bedrijf, adres, plaats, postcode, land, url):
 		self._valueErrors = dict()
 		self.leveranciersnummer = leveranciersnummer
@@ -129,13 +129,13 @@ class tblleveranciers:
 		if value is None:
 			self._url = value
 		else:
-			if type(value) is longtext:
+			if type(value) is str:
 				self._url = str(value)
 			else:
 				self._valueErrors["url"] = ValueError("input voor url is ongeldig")
 
 	def __str__(self):
-		return "tblleveranciers: leveranciersnummer: %s" % self.leveranciersnummer
+		return "Leveranciers: leveranciersnummer: %s" % self.leveranciersnummer
 
 	def __repr__(self):
 		self.__str__()

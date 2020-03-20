@@ -1,7 +1,7 @@
 import re
 
 
-class tblorderinformatie:
+class Orderinformatie:
 	def __init__(self, orderid, productnummer, hoeveelheid, korting):
 		self._valueErrors = dict()
 		self.orderid = orderid
@@ -76,7 +76,7 @@ class tblorderinformatie:
 				self._valueErrors["korting"] = ValueError("input voor korting is ongeldig")
 
 	def __str__(self):
-		return "tblorderinformatie: orderid: %s" % self.orderid
+		return "Orderinformatie: orderid: %s" % self.orderid
 
 	def __repr__(self):
 		self.__str__()

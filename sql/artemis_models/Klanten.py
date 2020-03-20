@@ -1,8 +1,8 @@
 import re
 
 
-class tblklanten:
-	def __init__(self, klantnummer, naam, straat, postnr, gemeente, ondernemingsnr, tblklanten_type, saldo, opmerking):
+class Klanten:
+	def __init__(self, klantnummer, naam, straat, postnr, gemeente, ondernemingsnr, type_klanten, saldo, opmerking):
 		self._valueErrors = dict()
 		self.klantnummer = klantnummer
 		self.naam = naam
@@ -10,7 +10,7 @@ class tblklanten:
 		self.postnr = postnr
 		self.gemeente = gemeente
 		self.ondernemingsnr = ondernemingsnr
-		self.tblklanten_type = tblklanten_type
+		self.type_klanten = type_klanten
 		self.saldo = saldo
 		self.opmerking = opmerking
 
@@ -123,21 +123,21 @@ class tblklanten:
 				self._valueErrors["ondernemingsnr"] = ValueError("input voor ondernemingsnr is ongeldig")
 
 	@property
-	def tblklanten_type(self):
-		return self._tblklanten_type
-	@tblklanten_type.setter
-	def tblklanten_type(self, value):
+	def type_klanten(self):
+		return self._type_klanten
+	@type_klanten.setter
+	def type_klanten(self, value):
 		# Property CAN be None
 		if value is None:
-			self._tblklanten_type = value
+			self._type_klanten = value
 		else:
 			if type(value) is str:
 				if len(str(value)) <= 1:
-					self._tblklanten_type = str(value)
+					self._type_klanten = str(value)
 				else:
-					self._valueErrors["tblklanten_type"] = ValueError("input voor tblklanten_type is te lang")
+					self._valueErrors["type_klanten"] = ValueError("input voor type_klanten is te lang")
 			else:
-				self._valueErrors["tblklanten_type"] = ValueError("input voor tblklanten_type is ongeldig")
+				self._valueErrors["type_klanten"] = ValueError("input voor type_klanten is ongeldig")
 
 	@property
 	def saldo(self):
@@ -162,13 +162,13 @@ class tblklanten:
 		if value is None:
 			self._opmerking = value
 		else:
-			if type(value) is longtext:
+			if type(value) is str:
 				self._opmerking = str(value)
 			else:
 				self._valueErrors["opmerking"] = ValueError("input voor opmerking is ongeldig")
 
 	def __str__(self):
-		return "tblklanten: klantnummer: %s" % self.klantnummer
+		return "Klanten: klantnummer: %s" % self.klantnummer
 
 	def __repr__(self):
 		self.__str__()
