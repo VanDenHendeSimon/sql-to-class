@@ -11,7 +11,7 @@ This sounds very straight forward, but we have to keep in mind that datatypes in
 
 Take for instance CHAR (50), or VARCHAR (50), or DECIMAL (8,2), or tinyint, smallint, mediumint, … The list goes on. These have to be processed and validated carefully in the setter function of each property, which mirrors one column of one table.    
 
-When your database has a lot of tables, which have a lot of columns, this can rapidly turn into a lot of work. On top of that, there is also a very high risk to commit human-errors. Both of these I thought could be avoided rather easily.  
+When your database has a lot of tables, which have a lot of columns, this can rapidly turn into a lot of work. On top of that, there is also a very high risk to commit human-errors. Both of these I thought could be avoided by automation.  
 
 All of this manual labor is eliminated by this script.  
 All of the generated code is included in this repo: ./sql/anyfolder_python
