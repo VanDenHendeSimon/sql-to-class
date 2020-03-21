@@ -268,6 +268,22 @@ def translate_datatype(tabs, lines, limits, datatype):
     if datatype == "varchar" or datatype == "longtext":
         datatype = "str"
 
+    if datatype == "tinytext":
+        datatype = "str"
+        limits = ["255"]
+
+    if datatype == "text":
+        datatype = "str"
+        limits = ["65535"]
+
+    if datatype == "mediumtext":
+        datatype = "str"
+        limits = ["16777215"]
+
+    if datatype == "longtext":
+        datatype = "str"
+        limits = ["4294967295"]
+
     elif datatype == "char":
         exact = True
         datatype = "str"
@@ -443,7 +459,6 @@ def generate_repositories(repos, database_name, tables):
                 lines.append("\t\t\t%s = %s(%s) if %s is not None else None" % (
                     rewritten_prop, datatype, rewritten_prop, rewritten_prop
                 ))
-                lines.append("")
 
         lines.append("")
         lines.append("\t\treturn %s(%s)" % (

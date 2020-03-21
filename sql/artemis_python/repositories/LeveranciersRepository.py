@@ -50,7 +50,6 @@ class LeveranciersRepository:
         if row is not None and type(row) is dict:
             leveranciersnummer = LeveranciersRepository.check_column(row, "Leveranciersnummer")
             leveranciersnummer = int(leveranciersnummer) if leveranciersnummer is not None else None
-
             bedrijf = LeveranciersRepository.check_column(row, "Bedrijf")
             adres = LeveranciersRepository.check_column(row, "Adres")
             plaats = LeveranciersRepository.check_column(row, "Plaats")

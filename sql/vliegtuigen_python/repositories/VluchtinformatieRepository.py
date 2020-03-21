@@ -50,15 +50,11 @@ class VluchtinformatieRepository:
         if row is not None and type(row) is dict:
             vluchtnr = VluchtinformatieRepository.check_column(row, "VluchtNr")
             vluchtnr = int(vluchtnr) if vluchtnr is not None else None
-
             stoelnr = VluchtinformatieRepository.check_column(row, "StoelNr")
             stoelnr = int(stoelnr) if stoelnr is not None else None
-
             klantid = VluchtinformatieRepository.check_column(row, "KlantID")
             klantid = int(klantid) if klantid is not None else None
-
             prijsbetaaldvoorstoel = VluchtinformatieRepository.check_column(row, "PrijsBetaaldVoorStoel")
             prijsbetaaldvoorstoel = float(prijsbetaaldvoorstoel) if prijsbetaaldvoorstoel is not None else None
-
 
         return Vluchtinformatie(vluchtnr, stoelnr, klantid, prijsbetaaldvoorstoel)

@@ -50,33 +50,24 @@ class ProductenRepository:
         if row is not None and type(row) is dict:
             productnummer = ProductenRepository.check_column(row, "Productnummer")
             productnummer = int(productnummer) if productnummer is not None else None
-
             leveranciersnummer = ProductenRepository.check_column(row, "Leveranciersnummer")
             leveranciersnummer = int(leveranciersnummer) if leveranciersnummer is not None else None
-
             categorienummer = ProductenRepository.check_column(row, "Categorienummer")
             categorienummer = int(categorienummer) if categorienummer is not None else None
-
             productnaam = ProductenRepository.check_column(row, "Productnaam")
             nederlandsenaam = ProductenRepository.check_column(row, "NederlandseNaam")
             hoeveelheidpereenheid = ProductenRepository.check_column(row, "HoeveelheidPerEenheid")
             prijspereenheid = ProductenRepository.check_column(row, "PrijsPerEenheid")
             prijspereenheid = float(prijspereenheid) if prijspereenheid is not None else None
-
             voorraad = ProductenRepository.check_column(row, "Voorraad")
             voorraad = int(voorraad) if voorraad is not None else None
-
             btwcode = ProductenRepository.check_column(row, "BTWCode")
             btwcode = int(btwcode) if btwcode is not None else None
-
             inbestelling = ProductenRepository.check_column(row, "InBestelling")
             inbestelling = int(inbestelling) if inbestelling is not None else None
-
             bestelpunt = ProductenRepository.check_column(row, "Bestelpunt")
             bestelpunt = int(bestelpunt) if bestelpunt is not None else None
-
             uitassortiment = ProductenRepository.check_column(row, "UitAssortiment")
             uitassortiment = int(uitassortiment) if uitassortiment is not None else None
-
 
         return Producten(productnummer, leveranciersnummer, categorienummer, productnaam, nederlandsenaam, hoeveelheidpereenheid, prijspereenheid, voorraad, btwcode, inbestelling, bestelpunt, uitassortiment)

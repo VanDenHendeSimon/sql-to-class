@@ -50,11 +50,9 @@ class WerknemerRepository:
         if row is not None and type(row) is dict:
             werknemerid = WerknemerRepository.check_column(row, "WerknemerID")
             werknemerid = int(werknemerid) if werknemerid is not None else None
-
             naam = WerknemerRepository.check_column(row, "Naam")
             typeid = WerknemerRepository.check_column(row, "TypeID")
             typeid = int(typeid) if typeid is not None else None
-
             foto = WerknemerRepository.check_column(row, "Foto")
 
         return Werknemer(werknemerid, naam, typeid, foto)

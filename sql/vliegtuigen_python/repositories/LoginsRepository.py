@@ -50,7 +50,6 @@ class LoginsRepository:
         if row is not None and type(row) is dict:
             loginid = LoginsRepository.check_column(row, "loginID")
             loginid = int(loginid) if loginid is not None else None
-
             voornaam = LoginsRepository.check_column(row, "voornaam")
             naam = LoginsRepository.check_column(row, "naam")
             paswoord = LoginsRepository.check_column(row, "paswoord")

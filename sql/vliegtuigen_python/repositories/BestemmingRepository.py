@@ -50,12 +50,10 @@ class BestemmingRepository:
         if row is not None and type(row) is dict:
             bestemmingid = BestemmingRepository.check_column(row, "BestemmingID")
             bestemmingid = int(bestemmingid) if bestemmingid is not None else None
-
             afkorting = BestemmingRepository.check_column(row, "Afkorting")
             voluit = BestemmingRepository.check_column(row, "Voluit")
             land = BestemmingRepository.check_column(row, "Land")
             typevlucht = BestemmingRepository.check_column(row, "TypeVlucht")
             typevlucht = int(typevlucht) if typevlucht is not None else None
-
 
         return Bestemming(bestemmingid, afkorting, voluit, land, typevlucht)

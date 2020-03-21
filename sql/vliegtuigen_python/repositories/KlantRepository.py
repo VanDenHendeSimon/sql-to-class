@@ -50,14 +50,12 @@ class KlantRepository:
         if row is not None and type(row) is dict:
             klantid = KlantRepository.check_column(row, "KlantID")
             klantid = int(klantid) if klantid is not None else None
-
             fnaam = KlantRepository.check_column(row, "FNaam")
             vnaam = KlantRepository.check_column(row, "VNaam")
             straat = KlantRepository.check_column(row, "Straat")
             nummer = KlantRepository.check_column(row, "Nummer")
             postcode = KlantRepository.check_column(row, "Postcode")
             postcode = int(postcode) if postcode is not None else None
-
             gemeente = KlantRepository.check_column(row, "Gemeente")
 
         return Klant(klantid, fnaam, vnaam, straat, nummer, postcode, gemeente)

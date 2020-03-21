@@ -50,7 +50,6 @@ class CategorieenRepository:
         if row is not None and type(row) is dict:
             categorienummer = CategorieenRepository.check_column(row, "Categorienummer")
             categorienummer = int(categorienummer) if categorienummer is not None else None
-
             categorienaam = CategorieenRepository.check_column(row, "Categorienaam")
             bijschrijving = CategorieenRepository.check_column(row, "Bijschrijving")
 

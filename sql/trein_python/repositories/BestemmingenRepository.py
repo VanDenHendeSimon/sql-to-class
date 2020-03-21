@@ -50,7 +50,6 @@ class BestemmingenRepository:
         if row is not None and type(row) is dict:
             idbestemming = BestemmingenRepository.check_column(row, "idbestemming")
             idbestemming = int(idbestemming) if idbestemming is not None else None
-
             stad = BestemmingenRepository.check_column(row, "stad")
             latitude = BestemmingenRepository.check_column(row, "latitude")
             llngitude = BestemmingenRepository.check_column(row, "Llngitude")

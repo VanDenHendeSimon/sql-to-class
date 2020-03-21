@@ -50,9 +50,7 @@ class BtwtariefRepository:
         if row is not None and type(row) is dict:
             btwcode = BtwtariefRepository.check_column(row, "BTWCode")
             btwcode = int(btwcode) if btwcode is not None else None
-
             btwpercentage = BtwtariefRepository.check_column(row, "BTWPercentage")
             btwpercentage = float(btwpercentage) if btwpercentage is not None else None
-
 
         return Btwtarief(btwcode, btwpercentage)

@@ -50,10 +50,8 @@ class HuidigeprijssettingRepository:
         if row is not None and type(row) is dict:
             typevlucht = HuidigeprijssettingRepository.check_column(row, "TypeVlucht")
             typevlucht = int(typevlucht) if typevlucht is not None else None
-
             huidigeprijssetting = HuidigeprijssettingRepository.check_column(row, "HuidigePrijsSetting")
             huidigeprijssetting = float(huidigeprijssetting) if huidigeprijssetting is not None else None
-
             omschrijving = HuidigeprijssettingRepository.check_column(row, "omschrijving")
 
         return Huidigeprijssetting(typevlucht, huidigeprijssetting, omschrijving)

@@ -40,8 +40,11 @@ class Treinen:
     @vertrek.setter
     def vertrek(self, value):
         # Property CAN NOT be None
-        if type(value) is tinytext:
-            self._vertrek = str(value)
+        if type(value) is str:
+            if len(str(value)) <= 255:
+                self._vertrek = str(value)
+            else:
+                self._valueErrors["vertrek"] = ValueError("input voor vertrek is te lang")
         else:
             self._valueErrors["vertrek"] = ValueError("input voor vertrek is ongeldig")
 

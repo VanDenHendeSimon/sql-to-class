@@ -50,7 +50,6 @@ class KlantenRepository:
         if row is not None and type(row) is dict:
             klantnummer = KlantenRepository.check_column(row, "Klantnummer")
             klantnummer = int(klantnummer) if klantnummer is not None else None
-
             naam = KlantenRepository.check_column(row, "Naam")
             straat = KlantenRepository.check_column(row, "Straat")
             postnr = KlantenRepository.check_column(row, "Postnr")
@@ -59,7 +58,6 @@ class KlantenRepository:
             type_klanten = KlantenRepository.check_column(row, "Type")
             saldo = KlantenRepository.check_column(row, "Saldo")
             saldo = float(saldo) if saldo is not None else None
-
             opmerking = KlantenRepository.check_column(row, "Opmerking")
 
         return Klanten(klantnummer, naam, straat, postnr, gemeente, ondernemingsnr, type_klanten, saldo, opmerking)

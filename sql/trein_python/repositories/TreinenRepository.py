@@ -50,21 +50,14 @@ class TreinenRepository:
         if row is not None and type(row) is dict:
             idtrein = TreinenRepository.check_column(row, "idtrein")
             idtrein = int(idtrein) if idtrein is not None else None
-
             vertrek = TreinenRepository.check_column(row, "vertrek")
-            vertrek = tinytext(vertrek) if vertrek is not None else None
-
             bestemmingid = TreinenRepository.check_column(row, "bestemmingID")
             bestemmingid = int(bestemmingid) if bestemmingid is not None else None
-
             spoor = TreinenRepository.check_column(row, "spoor")
             spoor = int(spoor) if spoor is not None else None
-
             vertraging = TreinenRepository.check_column(row, "vertraging")
             vertraging = int(vertraging) if vertraging is not None else None
-
             afgeschaft = TreinenRepository.check_column(row, "afgeschaft")
             afgeschaft = int(afgeschaft) if afgeschaft is not None else None
-
 
         return Treinen(idtrein, vertrek, bestemmingid, spoor, vertraging, afgeschaft)

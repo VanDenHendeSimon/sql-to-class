@@ -50,7 +50,6 @@ class VerzendersRepository:
         if row is not None and type(row) is dict:
             verzendid = VerzendersRepository.check_column(row, "VerzendID")
             verzendid = int(verzendid) if verzendid is not None else None
-
             bedrijf = VerzendersRepository.check_column(row, "Bedrijf")
             telefoonnummer = VerzendersRepository.check_column(row, "Telefoonnummer")
 

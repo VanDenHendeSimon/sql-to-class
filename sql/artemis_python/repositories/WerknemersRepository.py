@@ -50,7 +50,6 @@ class WerknemersRepository:
         if row is not None and type(row) is dict:
             werknemerid = WerknemersRepository.check_column(row, "WerknemerID")
             werknemerid = int(werknemerid) if werknemerid is not None else None
-
             familienaam = WerknemersRepository.check_column(row, "Familienaam")
             voornaam = WerknemersRepository.check_column(row, "Voornaam")
             adres = WerknemersRepository.check_column(row, "Adres")
@@ -60,18 +59,15 @@ class WerknemersRepository:
             functie = WerknemersRepository.check_column(row, "Functie")
             brutowedde = WerknemersRepository.check_column(row, "BrutoWedde")
             brutowedde = int(brutowedde) if brutowedde is not None else None
-
             superieur = WerknemersRepository.check_column(row, "Superieur")
             toestelnummer = WerknemersRepository.check_column(row, "Toestelnummer")
             auto = WerknemersRepository.check_column(row, "Auto")
             auto = int(auto) if auto is not None else None
-
             indienst = WerknemersRepository.check_column(row, "InDienst")
             geboortedatum = WerknemersRepository.check_column(row, "Geboortedatum")
             geslacht = WerknemersRepository.check_column(row, "Geslacht")
             foto = WerknemersRepository.check_column(row, "Foto")
             foto = longblob(foto) if foto is not None else None
-
             bijzonderheden = WerknemersRepository.check_column(row, "Bijzonderheden")
 
         return Werknemers(werknemerid, familienaam, voornaam, adres, gemeente, postcode, telefoonnummer, functie, brutowedde, superieur, toestelnummer, auto, indienst, geboortedatum, geslacht, foto, bijzonderheden)

@@ -50,21 +50,16 @@ class OrdersRepository:
         if row is not None and type(row) is dict:
             orderid = OrdersRepository.check_column(row, "OrderID")
             orderid = int(orderid) if orderid is not None else None
-
             klantnummer = OrdersRepository.check_column(row, "Klantnummer")
             klantnummer = int(klantnummer) if klantnummer is not None else None
-
             werknemerid = OrdersRepository.check_column(row, "WerknemerID")
             werknemerid = int(werknemerid) if werknemerid is not None else None
-
             verzendid = OrdersRepository.check_column(row, "VerzendID")
             verzendid = int(verzendid) if verzendid is not None else None
-
             orderdatum = OrdersRepository.check_column(row, "Orderdatum")
             vervaldatum = OrdersRepository.check_column(row, "Vervaldatum")
             leverdatum = OrdersRepository.check_column(row, "Leverdatum")
             vrachtkosten = OrdersRepository.check_column(row, "Vrachtkosten")
             vrachtkosten = float(vrachtkosten) if vrachtkosten is not None else None
-
 
         return Orders(orderid, klantnummer, werknemerid, verzendid, orderdatum, vervaldatum, leverdatum, vrachtkosten)

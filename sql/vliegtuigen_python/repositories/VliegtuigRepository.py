@@ -50,12 +50,10 @@ class VliegtuigRepository:
         if row is not None and type(row) is dict:
             vliegtuigid = VliegtuigRepository.check_column(row, "VliegtuigID")
             vliegtuigid = int(vliegtuigid) if vliegtuigid is not None else None
-
             vliegtuigbouwer = VliegtuigRepository.check_column(row, "Vliegtuigbouwer")
             type_vliegtuig = VliegtuigRepository.check_column(row, "Type")
             maxaantalzitplaatsenindittoestel = VliegtuigRepository.check_column(row, "MaxAantalZitplaatsenInDitToestel")
             maxaantalzitplaatsenindittoestel = int(maxaantalzitplaatsenindittoestel) if maxaantalzitplaatsenindittoestel is not None else None
-
             internecode = VliegtuigRepository.check_column(row, "InterneCode")
 
         return Vliegtuig(vliegtuigid, vliegtuigbouwer, type_vliegtuig, maxaantalzitplaatsenindittoestel, internecode)

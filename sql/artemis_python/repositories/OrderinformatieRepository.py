@@ -50,15 +50,11 @@ class OrderinformatieRepository:
         if row is not None and type(row) is dict:
             orderid = OrderinformatieRepository.check_column(row, "OrderID")
             orderid = int(orderid) if orderid is not None else None
-
             productnummer = OrderinformatieRepository.check_column(row, "Productnummer")
             productnummer = int(productnummer) if productnummer is not None else None
-
             hoeveelheid = OrderinformatieRepository.check_column(row, "Hoeveelheid")
             hoeveelheid = float(hoeveelheid) if hoeveelheid is not None else None
-
             korting = OrderinformatieRepository.check_column(row, "Korting")
             korting = float(korting) if korting is not None else None
-
 
         return Orderinformatie(orderid, productnummer, hoeveelheid, korting)
