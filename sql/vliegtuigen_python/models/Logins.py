@@ -88,9 +88,9 @@ class Logins:
 				if len(re.findall(r'\d{4}-\d{2}-\d{2}', value)[0]) == len(value):
 					self._gebdatum = str(value)
 				else:
-					self._valueErrors["gebdatum"] = ValueError("input voor gebdatum match het patroon niet (\d{4}-\d{2}-\d{2})")
+					self._valueErrors["gebdatum"] = ValueError("input voor gebdatum match het patroon niet (yyyy-mm-dd)")
 			except Exception:
-				self._valueErrors["gebdatum"] = ValueError("input voor gebdatum match het patroon niet (\d{4}-\d{2}-\d{2})")
+				self._valueErrors["gebdatum"] = ValueError("input voor gebdatum match het patroon niet (yyyy-mm-dd)")
 		else:
 			self._valueErrors["gebdatum"] = ValueError("input voor gebdatum is ongeldig")
 

@@ -164,6 +164,21 @@ def check_decimal_limits(limits, tabs):
     return result
 
 
+def regex_pattern(limit):
+    pattern = ""
+
+    if limit == "\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}":
+        pattern = "yyyy-mm-dd hh:mm:ss"
+    elif limit == "\d{4}-\d{2}-\d{2}":
+        pattern = "yyyy-mm-dd"
+    elif limit == "\d{2}:\d{2}:\d{2}":
+        pattern = "hh:mm:ss"
+    elif limit == "\d{4}":
+        pattern = "yyyy"
+
+    return pattern
+
+
 def check_limits(lines, limits, tabs, prop, datatype, exact=False):
     if limits:
         if datatype == "str":
@@ -195,12 +210,12 @@ def check_limits(lines, limits, tabs, prop, datatype, exact=False):
                 lines.append("\t" * (tabs + 2) +
                              "self._valueErrors[\"%s\"] = "
                              "ValueError(\"input voor %s match het patroon niet (%s)\")"
-                             % (prop, prop, limit))
+                             % (prop, prop, regex_pattern(limit)))
                 lines.append("\t" * tabs + "except Exception:")
                 lines.append("\t" * (tabs + 1) +
                              "self._valueErrors[\"%s\"] = "
                              "ValueError(\"input voor %s match het patroon niet (%s)\")"
-                             % (prop, prop, limit))
+                             % (prop, prop, regex_pattern(limit)))
         else:
             if datatype == "int":
                 lines.append(check_int_limits(limits, tabs))

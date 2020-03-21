@@ -243,9 +243,9 @@ class Werknemers:
 					if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
 						self._indienst = str(value)
 					else:
-						self._valueErrors["indienst"] = ValueError("input voor indienst match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+						self._valueErrors["indienst"] = ValueError("input voor indienst match het patroon niet (yyyy-mm-dd hh:mm:ss)")
 				except Exception:
-					self._valueErrors["indienst"] = ValueError("input voor indienst match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+					self._valueErrors["indienst"] = ValueError("input voor indienst match het patroon niet (yyyy-mm-dd hh:mm:ss)")
 			else:
 				self._valueErrors["indienst"] = ValueError("input voor indienst is ongeldig")
 
@@ -264,9 +264,9 @@ class Werknemers:
 					if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
 						self._geboortedatum = str(value)
 					else:
-						self._valueErrors["geboortedatum"] = ValueError("input voor geboortedatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+						self._valueErrors["geboortedatum"] = ValueError("input voor geboortedatum match het patroon niet (yyyy-mm-dd hh:mm:ss)")
 				except Exception:
-					self._valueErrors["geboortedatum"] = ValueError("input voor geboortedatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+					self._valueErrors["geboortedatum"] = ValueError("input voor geboortedatum match het patroon niet (yyyy-mm-dd hh:mm:ss)")
 			else:
 				self._valueErrors["geboortedatum"] = ValueError("input voor geboortedatum is ongeldig")
 
