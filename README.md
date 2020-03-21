@@ -1,4 +1,4 @@
-MySQL Table Mapping To Python Automation
+# MySQL Table Mapping To Python Automation
 
 During my Data Management course at Howest University, we learned the ins and outs of the Data Manupilation Language. Translated: CRUD. Translated: Create Read Update Delete.
 
