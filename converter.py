@@ -452,7 +452,7 @@ def generate_repositories(repos, database_name, tables):
 
         # Write repository class to disk
         with open(os.path.join(repos, "%sRepository" % table) + ".py", "w") as f:
-            f.writelines(["%s\n" % line for line in lines])
+            f.writelines(["%s\n" % line.replace("\t", "    ") for line in lines])
 
 
 def generate_classes(models, tables):
@@ -532,7 +532,7 @@ def generate_classes(models, tables):
 
         # Writing the file to disk
         with open(os.path.join(models, table) + ".py", "w") as f:
-            f.writelines(["%s\n" % line for line in lines])
+            f.writelines(["%s\n" % line.replace("\t", "    ") for line in lines])
 
 
 def convert_file(filepath):
