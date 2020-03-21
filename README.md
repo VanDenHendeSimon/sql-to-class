@@ -13,4 +13,5 @@ Take for instance CHAR (50), or VARCHAR (50), or DECIMAL (8,2), or tinyint, smal
 
 When your database has a lot of tables, which have a lot of columns, this can rapidly turn into a lot of work. On top of that, there is also a very high risk to commit human-errors. Both of these I thought could be avoided rather easily.  
 
-All of this manual labor is eliminated by this script.
+All of this manual labor is eliminated by this script.  
+All of the generated code is included in this repo: ./sql/anyfolder_python
