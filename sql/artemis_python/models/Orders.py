@@ -98,9 +98,12 @@ class Orders:
 		else:
 			#'0000-00-00 00:00:00'
 			if type(value) is str:
-				if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
-					self._orderdatum = str(value)
-				else:
+				try:
+					if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
+						self._orderdatum = str(value)
+					else:
+						self._valueErrors["orderdatum"] = ValueError("input voor orderdatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+				except Exception:
 					self._valueErrors["orderdatum"] = ValueError("input voor orderdatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
 			else:
 				self._valueErrors["orderdatum"] = ValueError("input voor orderdatum is ongeldig")
@@ -116,9 +119,12 @@ class Orders:
 		else:
 			#'0000-00-00 00:00:00'
 			if type(value) is str:
-				if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
-					self._vervaldatum = str(value)
-				else:
+				try:
+					if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
+						self._vervaldatum = str(value)
+					else:
+						self._valueErrors["vervaldatum"] = ValueError("input voor vervaldatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+				except Exception:
 					self._valueErrors["vervaldatum"] = ValueError("input voor vervaldatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
 			else:
 				self._valueErrors["vervaldatum"] = ValueError("input voor vervaldatum is ongeldig")
@@ -134,9 +140,12 @@ class Orders:
 		else:
 			#'0000-00-00 00:00:00'
 			if type(value) is str:
-				if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
-					self._leverdatum = str(value)
-				else:
+				try:
+					if len(re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value)[0]) == len(value):
+						self._leverdatum = str(value)
+					else:
+						self._valueErrors["leverdatum"] = ValueError("input voor leverdatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
+				except Exception:
 					self._valueErrors["leverdatum"] = ValueError("input voor leverdatum match het patroon niet (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
 			else:
 				self._valueErrors["leverdatum"] = ValueError("input voor leverdatum is ongeldig")

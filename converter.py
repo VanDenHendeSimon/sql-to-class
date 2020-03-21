@@ -188,9 +188,15 @@ def check_limits(lines, limits, tabs, prop, datatype, exact=False):
                         ))
             except Exception:
                 # Limit cant be turned into an int, so it's a regular expression
-                lines.append("\t" * tabs + "if len(re.findall(r'%s', value)[0]) == len(value):" % limit)
-                lines.append("\t" * (tabs + 1) + "self._%s = str(value)" % prop)
-                lines.append("\t" * tabs + "else:")
+                lines.append("\t" * tabs + "try:")
+                lines.append("\t" * (tabs + 1) + "if len(re.findall(r'%s', value)[0]) == len(value):" % limit)
+                lines.append("\t" * (tabs + 2) + "self._%s = str(value)" % prop)
+                lines.append("\t" * (tabs + 1) + "else:")
+                lines.append("\t" * (tabs + 2) +
+                             "self._valueErrors[\"%s\"] = "
+                             "ValueError(\"input voor %s match het patroon niet (%s)\")"
+                             % (prop, prop, limit))
+                lines.append("\t" * tabs + "except Exception:")
                 lines.append("\t" * (tabs + 1) +
                              "self._valueErrors[\"%s\"] = "
                              "ValueError(\"input voor %s match het patroon niet (%s)\")"

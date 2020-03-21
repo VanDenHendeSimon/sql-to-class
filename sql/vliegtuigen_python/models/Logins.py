@@ -84,9 +84,12 @@ class Logins:
 		# Property CAN NOT be None
 		#'0000-00-00'
 		if type(value) is str:
-			if len(re.findall(r'\d{4}-\d{2}-\d{2}', value)[0]) == len(value):
-				self._gebdatum = str(value)
-			else:
+			try:
+				if len(re.findall(r'\d{4}-\d{2}-\d{2}', value)[0]) == len(value):
+					self._gebdatum = str(value)
+				else:
+					self._valueErrors["gebdatum"] = ValueError("input voor gebdatum match het patroon niet (\d{4}-\d{2}-\d{2})")
+			except Exception:
 				self._valueErrors["gebdatum"] = ValueError("input voor gebdatum match het patroon niet (\d{4}-\d{2}-\d{2})")
 		else:
 			self._valueErrors["gebdatum"] = ValueError("input voor gebdatum is ongeldig")
