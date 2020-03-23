@@ -550,6 +550,37 @@ def generate_classes(models, tables):
             f.writelines(["%s\n" % line.replace("\t", " "*4) for line in lines])
 
 
+def prepare_for_export(filepath, database_name):
+    """
+    This function defines and creates the necessary folders that the generated classes will be written to.
+    These folders are cleared first so no previous export data is remaining
+
+    :param filepath: filepath of the .sql file.
+    The root folder of the exported code is placed in the same directory.
+    :param database_name: The name of the database we are going to generate classes for.
+    This name is used to name the root folder.
+    :return: The filepaths of the root, models and repositories directories
+    """
+    # Define directories to store generated files
+    root_dir = os.path.join(os.path.dirname(filepath), "%s_python" % database_name)
+    models_dir = os.path.join(root_dir, "models")
+    repositories_dir = os.path.join(root_dir, "repositories")
+
+    # Clear previous exports
+    if os.path.exists(root_dir):
+        try:
+            shutil.rmtree(root_dir, True)
+        except Exception:
+            pass
+
+    # Create directories to store generated files
+    os.makedirs(root_dir)
+    os.makedirs(models_dir)
+    os.makedirs(repositories_dir)
+
+    return root_dir, models_dir, repositories_dir
+
+
 def convert_file(filepath):
     """
     This is the main directory of the project.
@@ -578,22 +609,8 @@ def convert_file(filepath):
     database_name = get_database_name(data)
     tables = get_database_tables(data)
 
-    # Define directories to store generated files
-    root_dir = os.path.join(os.path.dirname(filepath), "%s_python" % database_name)
-    models_dir = os.path.join(root_dir, "models")
-    repositories_dir = os.path.join(root_dir, "repositories")
-
-    # Clear previous exports
-    if os.path.exists(root_dir):
-        try:
-            shutil.rmtree(root_dir, True)
-        except Exception:
-            pass
-
-    # Create directories to store generated files
-    os.makedirs(root_dir)
-    os.makedirs(models_dir)
-    os.makedirs(repositories_dir)
+    # Define and create export folders
+    root_dir, models_dir, repositories_dir = prepare_for_export(filepath, database_name)
 
     # Generate files
     generate_classes(models_dir, tables)
