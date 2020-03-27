@@ -5,6 +5,7 @@ from repositories.Database import Database
 class KlantenRepository:
     @staticmethod
     def json_or_formdata(request):
+        """This function is only necessary when using the repo in the backend of an api"""
         if request.content_type == 'application/json':
             data = request.get_json()
         else:

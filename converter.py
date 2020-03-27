@@ -385,10 +385,10 @@ def generate_repositories(repos, database_name, tables):
             "from repositories.Database import Database",
             "",
             "",
-            # Simple MySQL query to get all contents of the current table
             "class %sRepository:" % table,
             "\t@staticmethod",
             "\tdef json_or_formdata(request):",
+            "\t\t\"\"\"This function is only necessary when using the repo in the backend of an api\"\"\"",
             "\t\tif request.content_type == 'application/json':",
             "\t\t\tdata = request.get_json()",
             "\t\telse:",
@@ -396,6 +396,7 @@ def generate_repositories(repos, database_name, tables):
             "",
             "\t\treturn data",
             "",
+            # Simple MySQL query to get all contents of the current table
             "\t@staticmethod",
             "\tdef read_all():",
             "\t\tresult = []",
