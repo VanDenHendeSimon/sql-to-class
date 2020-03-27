@@ -3,7 +3,16 @@ from repositories.Database import Database
 
 
 class VluchtinformatieRepository:
-    @ staticmethod
+    @staticmethod
+    def json_or_formdata(request):
+        if request.content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+
+        return data
+
+    @staticmethod
     def read_all():
         result = []
         sql = "SELECT * FROM vliegtuigen.tblvluchtinformatie"
